@@ -1,5 +1,10 @@
 # dsh-jev
 
+[![Listed on dsh-plugin.org](https://dsh-plugin.org/badges/listed.svg)](https://dsh-plugin.org/plugins/Excalibur9527/dsh-jev)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+
+> 社区插件，与 DeepSeek AI 无隶属关系，也不是官方项目。
+
 给 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) 用的 **JEV 情绪 / 意图判定**插件。
 
 每一轮对话，插件会把用户**最新一条消息**发给 [typesafe.ai](https://typesafe.ai) 的 `systemone`(jev) 接口，
@@ -14,17 +19,18 @@
 ## 安装
 
 ```bash
-# 方式一：走 dsh 自带的插件管理（推荐，会写进 profile 的 dependencies 与 bundles）
+# 从 GitHub 装（推荐；会写进 profile 的 dependencies 与 dsh.profile.bundles）
+dsh plugin --profile web add github:Excalibur9527/dsh-jev
+
+# 本地目录（开发态）
 dsh plugin --profile web add /path/to/dsh-jev
 
-# 方式二（本机开发态 link 装法）：直接软链 + 改 profile 清单
+# 手动 link 装法（等价于上面 pnpm 的结果，仅供调试）
 ln -sfn /path/to/dsh-jev ~/.dsh/profiles/web/node_modules/dsh-jev
-# 然后在 ~/.dsh/profiles/web/package.json 里：
-#   dependencies:  "dsh-jev": "link:/path/to/dsh-jev"      # 必须是绝对路径
+# 再改 ~/.dsh/profiles/web/package.json：
+#   dependencies:        "dsh-jev": "link:/path/to/dsh-jev"   # 必须绝对路径
 #   dsh.profile.bundles: 追加 "dsh-jev"
 ```
-
-更省事的一种：克隆到固定位置后，把仓库目录本身当作插件路径传给 `dsh plugin add`。
 
 **装完必须重启 `dsh web` 宿主进程**：profile 的层栈在启动时组装，运行中的 loader 不会自动接入新插件。
 
@@ -48,6 +54,21 @@ ln -sfn /path/to/dsh-jev ~/.dsh/profiles/web/node_modules/dsh-jev
 | 判定问题 questions | 部门/情绪/紧急度三条 | 支持 `noul`（是/否）、`score`（评分，criteria 每行一档）、`choice`（单选，criteria 每行 `键=说明`） |
 
 设置页还有：**运行测试**（用当前配置真打一次接口，展示渲染结果与原始 JSON）、**最近调用**（时间/耗时/结果/最近错误）。
+
+## 权限与信任
+
+| 项目 | 说明 |
+| --- | --- |
+| 模块规范 | 导出 `apply(ctx, config)`，`inject` 声明 `agents`；`dsh.bundle.patch` 给 bundle 补丁，`dsh.client` 提供浏览器半边 |
+| 出网 | **只有** `POST https://api.typesafe.ai/v1/systemone`。**用户每轮最新一条消息的正文会发给这个第三方服务**——这是插件的核心功能；介意就别用，或把设置页里的「接口地址」指向自建代理 |
+| 读取 | 用户最新一条消息、`~/.dsh/settings.yaml` 中 `dsh-jev` 段的配置 |
+| 写入 | 只写 `settings.yaml` 的 `dsh-jev` 段（你在设置页点保存时）；不动其它文件 |
+| 密钥 | `apiKey` 标 `role('secret')` 存在 settings.yaml；RPC 返回前显式删除，**不会**回传浏览器 |
+| 监听端口 | 不监听任何端口。只注册一条包私有 RPC 通道 `/dsh-jev`，`authority: 'loopback'`，本机页面才能读写 |
+| 对话影响 | 每轮最多注入一条 user 消息（`source.kind='plugin'`）；无 key / 报错 / 超时一律原样放行，不阻塞对话 |
+| 兼容性 | DSH `0.1.1-rc.2` 实测通过；Node ≥ 22（用 `fetch`、`AbortSignal.any`）；profile：`web`（注入 + 设置页）、`headless`/TUI（注入可用，设置页需 Web GUI） |
+| 许可证 | [MIT](LICENSE) |
+| 测试 | `node --test test/host.test.mjs test/client.test.mjs` — 17 个用例，含一次真实接口往返 |
 
 ## 工作方式与取舍
 
@@ -83,3 +104,12 @@ TYPESAFE_API_KEY=xxx node --test test/host.test.mjs test/client.test.mjs
   只有从本机 loopback 打开的页面能读写设置，经局域网/隧道打开时会明确报错而不是静默失败。
 - 通道注册依赖 `connection` 与 `webServer` 两个服务；宿主不再同时提供它们时，注入照常工作，
   只有设置页不可用，并在宿主日志里留一条 warn。
+
+## 收录信息
+
+- GitHub topic：`dsh-plugin`
+- 安装命令：`dsh plugin --profile web add github:Excalibur9527/dsh-jev`
+- 支持 profile：`web`（完整功能）；`headless` / TUI（判定注入可用，设置页需 Web GUI）
+- 许可证：MIT
+- 依赖的第三方服务：[typesafe.ai](https://typesafe.ai) systemone（需要你自己的 API Key）
+- 本插件为社区作品，与 DeepSeek AI 及 typesafe.ai 均无隶属关系。
