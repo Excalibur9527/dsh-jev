@@ -1,0 +1,6 @@
+# link 安装时脚本生成的依赖软链，不入库
+node_modules/
+
+# 日志与本地临时产物
+*.log
+.DS_Store

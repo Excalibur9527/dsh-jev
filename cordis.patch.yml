@@ -1,0 +1,5 @@
+# dsh-jev 的 bundle 组合层（dsh.bundle.patch 指向本文件）：
+# 一个包一个条目，装进 profile 后由 loader 插入到层栈里。
+- insert:
+    - id: dsh-jev
+      name: dsh-jev
