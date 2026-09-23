@@ -1,6 +1,6 @@
 # dsh-jev
 
-[![Listed on dsh-plugin.org](https://dsh-plugin.org/badges/listed.svg)](https://dsh-plugin.org/plugins/Excalibur9527/dsh-jev)
+[![Listed on dsh-plugin.org](https://dsh-plugin.org/badges/listed.svg)](https://dsh-plugin.org/plugins/excalibur9527/dsh-jev)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 > 社区插件，与 DeepSeek AI 无隶属关系，也不是官方项目。
@@ -108,6 +108,7 @@ TYPESAFE_API_KEY=xxx node --test test/host.test.mjs test/client.test.mjs
 ## 收录信息
 
 - GitHub topic：`dsh-plugin`
+- 收录详情页（收录后生效）：`https://dsh-plugin.org/plugins/excalibur9527/dsh-jev` —— 该站路由**大小写敏感且要求全小写**，别写成 `Excalibur9527`
 - 安装命令：`dsh plugin --profile web add github:Excalibur9527/dsh-jev`
 - 支持 profile：`web`（完整功能）；`headless` / TUI（判定注入可用，设置页需 Web GUI）
 - 许可证：MIT
